@@ -1,0 +1,51 @@
+version: "3.9"
+
+services:
+  hub-backend:
+    build: ./backend
+    container_name: hub-backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./data:/app/data
+    environment:
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      AGENT_URL: ${AGENT_URL}
+      AGENT_KEY: ${AGENT_KEY}
+      DB_PATH: ${DB_PATH}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    depends_on:
+      - hub-agent
+    networks:
+      - hub-net
+
+  hub-frontend:
+    build: ./frontend
+    container_name: hub-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - hub-backend
+    networks:
+      - hub-net
+
+  hub-agent:
+    build: ./agent
+    container_name: hub-agent
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    environment:
+      PORT: 9100
+      AGENT_KEY: ${AGENT_KEY}
+    networks:
+      - hub-net
+
+networks:
+  hub-net:
+    driver: bridge

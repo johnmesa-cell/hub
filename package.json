@@ -1,0 +1,15 @@
+{
+  "name": "hub",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "backend",
+    "frontend",
+    "agent"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "dev": "npm run dev --workspace backend",
+    "start": "npm run start --workspace backend"
+  }
+}
