@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { AuthProvider, useAuthContext } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { Home } from './pages/Home';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import './styles.css';
 
 function AppRouter() {
-  const { token } = useAuthContext();
   const [pathname, setPathname] = useState(window.location.pathname);
 
   useEffect(() => {
@@ -20,7 +20,11 @@ function AppRouter() {
   }
 
   if (pathname === '/dashboard') {
-    return token ? <Dashboard /> : <Login />;
+    return (
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    );
   }
 
   return <Home />;

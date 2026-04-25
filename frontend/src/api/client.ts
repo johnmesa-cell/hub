@@ -1,3 +1,5 @@
+import { firebaseAuth } from '../firebase';
+
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
 
 export function getApiUrl(): string {
@@ -9,7 +11,10 @@ export function getWsUrl(): string {
   return configured.replace(/^http/i, 'ws');
 }
 
-export async function apiRequest<T>(path: string, init?: RequestInit, token?: string): Promise<T> {
+export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
+  const user = firebaseAuth.currentUser;
+  const token = user ? await user.getIdToken() : null;
+
   const response = await fetch(`${API_URL}${path}`, {
     ...init,
     headers: {
@@ -19,9 +24,17 @@ export async function apiRequest<T>(path: string, init?: RequestInit, token?: st
     }
   });
 
+  if (response.status === 401) {
+    window.history.pushState({}, '', '/login');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    throw new Error('Sesión expirada');
+  }
+
   if (!response.ok) {
-    const message = await response.text();
-    throw new Error(message || `Request failed with status ${response.status}`);
+    const payload = await response
+      .json()
+      .catch(() => null) as { error?: string } | null;
+    throw new Error(payload?.error ?? `Request failed with status ${response.status}`);
   }
 
   if (response.status === 204) {

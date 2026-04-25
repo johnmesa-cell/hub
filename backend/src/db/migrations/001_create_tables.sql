@@ -1,27 +1,20 @@
-CREATE TABLE IF NOT EXISTS users (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  username TEXT NOT NULL UNIQUE,
-  password TEXT NOT NULL,
-  role TEXT NOT NULL DEFAULT 'admin',
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  last_login DATETIME
-);
-
+-- Proyectos del portal
 CREATE TABLE IF NOT EXISTS projects (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT NOT NULL,
-  slug TEXT NOT NULL UNIQUE,
-  url TEXT NOT NULL,
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  name        TEXT NOT NULL,
+  slug        TEXT NOT NULL UNIQUE,
+  url         TEXT NOT NULL,
   description TEXT,
-  icon TEXT,
-  active INTEGER DEFAULT 1,
-  sort_order INTEGER DEFAULT 0
+  icon        TEXT,
+  active      INTEGER DEFAULT 1,
+  sort_order  INTEGER DEFAULT 0
 );
 
+-- Audit log: firebase_uid en lugar de FK a users
 CREATE TABLE IF NOT EXISTS audit_log (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id INTEGER REFERENCES users(id),
-  action TEXT NOT NULL,
-  ip TEXT,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  firebase_uid TEXT,
+  action      TEXT NOT NULL,
+  ip          TEXT,
+  created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
 );

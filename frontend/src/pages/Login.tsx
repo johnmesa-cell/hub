@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 
 function navigate(path: string) {
@@ -7,46 +6,30 @@ function navigate(path: string) {
 }
 
 export function Login() {
-  const { login } = useAuth();
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const { loginWithGoogle, loading } = useAuth();
+
+  const handleGoogleLogin = async () => {
+    try {
+      await loginWithGoogle();
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Login error:', error);
+    }
+  };
 
   return (
     <main className="page page-auth">
       <section className="auth-card">
         <span className="eyebrow">Acceso administrativo</span>
         <h1>Iniciar sesión</h1>
-        <form
-          className="auth-form"
-          onSubmit={async (event) => {
-            event.preventDefault();
-            setLoading(true);
-            setError(null);
-            try {
-              await login(username, password);
-              navigate('/dashboard');
-            } catch (cause) {
-              setError(cause instanceof Error ? cause.message : 'No se pudo autenticar');
-            } finally {
-              setLoading(false);
-            }
-          }}
+        <button
+          className="primary"
+          onClick={() => void handleGoogleLogin()}
+          disabled={loading}
+          style={{ width: '100%', marginTop: '1rem' }}
         >
-          <label>
-            Usuario
-            <input value={username} onChange={(event) => setUsername(event.target.value)} />
-          </label>
-          <label>
-            Contraseña
-            <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
-          </label>
-          {error ? <p className="error">{error}</p> : null}
-          <button className="primary" type="submit" disabled={loading}>
-            {loading ? 'Entrando...' : 'Entrar'}
-          </button>
-        </form>
+          {loading ? 'Conectando...' : '🔐 Continuar con Google'}
+        </button>
       </section>
     </main>
   );

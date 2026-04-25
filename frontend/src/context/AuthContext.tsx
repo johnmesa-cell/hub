@@ -1,39 +1,62 @@
-import { createContext, useContext, useMemo, useState } from 'react';
-import { apiRequest } from '../api/client';
-import type { AuthUser } from '../types';
+import { onAuthStateChanged, signOut, signInWithPopup, type User } from 'firebase/auth';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { firebaseAuth, googleProvider } from '../firebase';
 
 interface AuthContextValue {
-  token: string | null;
-  user: AuthUser | null;
-  login: (username: string, password: string) => Promise<void>;
+  user: User | null;
+  loading: boolean;
+  loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
+  getToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [token, setToken] = useState<string | null>(null);
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const value = useMemo<AuthContextValue>(() => ({
-    token,
-    user,
-    login: async (username: string, password: string) => {
-      const result = await apiRequest<{ token: string; user: AuthUser }>('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ username, password })
-      });
-      setToken(result.token);
-      setUser(result.user);
-    },
-    logout: async () => {
-      if (token) {
-        await apiRequest('/auth/logout', { method: 'POST' }, token);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(firebaseAuth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      user,
+      loading,
+      loginWithGoogle: async () => {
+        try {
+          await signInWithPopup(firebaseAuth, googleProvider);
+        } catch (error) {
+          console.error('Google login failed:', error);
+          throw error;
+        }
+      },
+      logout: async () => {
+        try {
+          await signOut(firebaseAuth);
+        } catch (error) {
+          console.error('Logout failed:', error);
+          throw error;
+        }
+      },
+      getToken: async () => {
+        if (!user) return null;
+        try {
+          return await user.getIdToken();
+        } catch (error) {
+          console.error('Failed to get ID token:', error);
+          return null;
+        }
       }
-      setToken(null);
-      setUser(null);
-    }
-  }), [token, user]);
+    }),
+    [user, loading]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

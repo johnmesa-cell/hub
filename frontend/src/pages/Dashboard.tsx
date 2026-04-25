@@ -11,24 +11,26 @@ function navigate(path: string) {
 }
 
 export function Dashboard() {
-  const { token, user, logout } = useAuth();
-  const { metrics, connected } = useMetricsSocket(token);
+  const { user, logout } = useAuth();
+  const { metrics, connected } = useMetricsSocket();
   const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
-    if (!token) {
+    if (!user) {
       navigate('/login');
       return;
     }
 
-    void apiRequest<{ projects: Project[] }>('/projects', undefined, token)
+    void apiRequest<{ projects: Project[] }>('/projects')
       .then((response) => setProjects(response.projects))
       .catch(() => setProjects([]));
-  }, [token]);
+  }, [user]);
 
-  if (!token) {
+  if (!user) {
     return null;
   }
+
+  const displayName = user.displayName ?? user.email ?? 'usuario';
 
   return (
     <main className="page page-dashboard">
@@ -37,7 +39,7 @@ export function Dashboard() {
           <span className="eyebrow">Dashboard</span>
           <h1>Control en tiempo real</h1>
           <p>
-            Sesión activa como {user?.username ?? 'admin'} · {connected ? 'WebSocket conectado' : 'Conectando...'}
+            Sesión activa como {displayName} · {connected ? 'WebSocket conectado' : 'Conectando...'}
           </p>
         </div>
         <button

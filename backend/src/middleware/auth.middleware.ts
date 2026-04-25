@@ -1,7 +1,15 @@
 import type { NextFunction, Request, Response } from 'express';
-import { verifyToken } from '../services/auth.service';
+import { verifyFirebaseToken, type FirebaseUser } from '../services/auth.service';
 
-export function requireAuth(request: Request, response: Response, next: NextFunction): void {
+declare global {
+  namespace Express {
+    interface Request {
+      firebaseUser?: FirebaseUser;
+    }
+  }
+}
+
+export async function requireAuth(request: Request, response: Response, next: NextFunction): Promise<void> {
   const authorization = request.header('authorization');
   const token = authorization?.startsWith('Bearer ') ? authorization.slice(7) : undefined;
 
@@ -10,12 +18,12 @@ export function requireAuth(request: Request, response: Response, next: NextFunc
     return;
   }
 
-  const user = verifyToken(token);
+  const user = await verifyFirebaseToken(token);
   if (!user) {
     response.status(401).json({ error: 'Unauthorized' });
     return;
   }
 
-  request.authUser = user;
+  request.firebaseUser = user;
   next();
 }

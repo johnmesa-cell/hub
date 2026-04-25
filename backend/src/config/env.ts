@@ -2,14 +2,20 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+function requireEnv(key: string): string {
+  const value = process.env[key];
+  if (!value && process.env.NODE_ENV === 'production') {
+    throw new Error(`Variable de entorno requerida no definida: ${key}`);
+  }
+  return value ?? '';
+}
+
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
   port: Number(process.env.PORT ?? 3001),
-  jwtSecret: process.env.JWT_SECRET ?? 'development-secret',
-  jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '24h',
+  firebaseProjectId: requireEnv('FIREBASE_PROJECT_ID'),
   agentUrl: process.env.AGENT_URL ?? '',
   agentKey: process.env.AGENT_KEY ?? '',
   dbPath: process.env.DB_PATH ?? './data/hub.db',
-  adminUsername: process.env.ADMIN_USERNAME ?? 'admin',
-  adminPassword: process.env.ADMIN_PASSWORD ?? 'admin123'
+  allowedOrigins: process.env.ALLOWED_ORIGINS ?? 'http://localhost:5173'
 };
