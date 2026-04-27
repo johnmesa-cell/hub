@@ -16,6 +16,5 @@ export const env = {
   firebaseProjectId: requireEnv('FIREBASE_PROJECT_ID'),
   agentUrl: process.env.AGENT_URL ?? '',
   agentKey: process.env.AGENT_KEY ?? '',
-  dbPath: process.env.DB_PATH ?? './data/hub.db',
-  allowedOrigins: process.env.ALLOWED_ORIGINS ?? 'http://localhost:5173'
+  allowedOrigins: process.env.ALLOWED_ORIGINS ?? 'http://localhost:5173',
 };

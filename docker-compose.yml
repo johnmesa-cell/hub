@@ -8,16 +8,14 @@ services:
     ports:
       - "3001:3001"
     volumes:
-      - ./data:/app/data
+      - ./backend/serviceAccountKey.json:/run/secrets/serviceAccountKey.json:ro
     environment:
       NODE_ENV: production
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/serviceAccountKey.json
       AGENT_URL: ${AGENT_URL}
       AGENT_KEY: ${AGENT_KEY}
-      DB_PATH: ${DB_PATH}
-      ADMIN_USERNAME: ${ADMIN_USERNAME}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
     depends_on:
       - hub-agent
     networks:
@@ -38,8 +36,6 @@ services:
     build: ./agent
     container_name: hub-agent
     restart: unless-stopped
-    ports:
-      - "9100:9100"
     environment:
       PORT: 9100
       AGENT_KEY: ${AGENT_KEY}

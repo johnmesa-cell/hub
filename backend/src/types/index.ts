@@ -1,11 +1,11 @@
 export interface Project {
-  id: number;
+  id: string;
   name: string;
   slug: string;
   url: string;
   description: string | null;
   icon: string | null;
-  active: number;
+  active: boolean;
   sort_order: number;
 }
 
