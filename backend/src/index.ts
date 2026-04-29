@@ -3,6 +3,7 @@ import http from 'node:http';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import './config/firebase-admin';
 import { env } from './config/env';
 import { globalRateLimit, loginRateLimit } from './middleware/rate-limit.middleware';
 import { authRouter } from './routes/auth.routes';
@@ -12,11 +13,13 @@ import { errorMiddleware } from './middleware/error.middleware';
 import { attachMetricsWebSocket } from './ws/metrics.ws';
 
 const app = express();
+app.set('trust proxy', 1); // ← NUEVO
 
 const allowedOrigins = env.allowedOrigins.split(',').map((origin) => origin.trim()).filter(Boolean);
 
 app.use(
   helmet({
+    crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
@@ -28,11 +31,7 @@ app.use(
         objectSrc: ["'none'"]
       }
     },
-    hsts: {
-      maxAge: 31536000,
-      includeSubDomains: true,
-      preload: true
-    },
+    hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
     frameguard: { action: 'deny' },
     noSniff: true,
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
@@ -41,16 +40,8 @@ app.use(
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin) {
-        callback(null, true);
-        return;
-      }
-
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-        return;
-      }
-
+      if (!origin) { callback(null, true); return; }
+      if (allowedOrigins.includes(origin)) { callback(null, true); return; }
       callback(new Error(`CORS: origen no permitido -> ${origin}`));
     },
     credentials: true,
