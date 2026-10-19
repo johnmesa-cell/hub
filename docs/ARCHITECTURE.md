@@ -1,11 +1,14 @@
-# Arquitectura del Sistema Hub
+# Arquitectura del Hub
 
-## Servidores
+## Componentes
 
-| Servidor | Rol | Servicios |
-|---|---|---|
-| Servidor 1 (Hub) | Principal | Backend, Frontend, Nginx |
-| Servidor 2 (Alex) | Secundario | Agent de métricas |
+| Componente | Responsabilidad |
+|---|---|
+| Nginx del VPS | HTTPS, rate limiting y proxy |
+| Frontend | Home pública, Firebase Auth y dashboard protegido |
+| Backend | Express, validación, autorización y API |
+| Firestore | `projects` y `audit_log` |
+| Firebase Auth | Google OAuth para cuentas permitidas |
 
 ## Subdominios
 
@@ -16,17 +19,15 @@
 | proyectox.tudominio.com | 80/443 -> servicio | Proyecto X |
 | db-admin.tudominio.com | 80/443 -> servicio | Admin DB |
 
-## Flujo de autenticación con Firebase
+Compose solo ejecuta `hub-backend` y `hub-frontend`, con puertos publicados en loopback.
 
-1. Usuario accede a hub.tudominio.com (Home pública)
-2. Click en "Continuar con Google" -> /login
-3. Firebase Auth (popup Google OAuth) -> ID token en cliente
-4. Frontend guarda en firebaseAuth.currentUser (memoria)
-5. /dashboard (ProtectedRoute verifica user !== null)
-6. Dashboard consulta /api/projects (ID token automático en Authorization header)
-7. Dashboard abre WebSocket /metrics/live (ID token en handshake)
-8. Renovación de token cada 50 minutos con user.getIdToken(true)
-9. Al cerrar sesión: Firebase signOut() limpia currentUser
+## Flujo público y privado
+
+1. Home espera a que Firebase restaure la sesión.
+2. Sin sesión, `GET /projects` devuelve solo `active=true` y `visibility=public`.
+3. Con token válido y correo permitido devuelve todos los activos.
+4. Dashboard usa `GET /projects?all=true` para incluir inactivos.
+5. POST, PUT y DELETE requieren autenticación, validación y auditoría.
 
 ## Flujo de autorización en Backend
 
@@ -46,7 +47,7 @@
 5. Validación Zod: Todos los inputs del body
 6. Firebase Auth: OAuth 2.0 + token ID verificado criptográficamente
 7. ID Token en memoria: No persiste en localStorage (solo en sesión Firebase)
-8. WebSocket auth: Handshake por mensaje con token renovable
-9. Audit log: Todas las acciones de escritura registradas con firebase_uid
-10. Variables de entorno: FIREBASE_PROJECT_ID validada en producción
-11. GOOGLE_APPLICATION_CREDENTIALS: Para Firebase Admin SDK (credenciales de servicio)
+8. Firestore Rules: todo acceso cliente denegado
+9. Variables de entorno: `FIREBASE_PROJECT_ID` y `ALLOWED_EMAILS`
+
+Los valores desconocidos de `visibility` se tratan como privados y `active` se almacena como booleano.
