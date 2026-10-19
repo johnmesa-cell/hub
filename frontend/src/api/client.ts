@@ -6,12 +6,7 @@ export function getApiUrl(): string {
   return API_URL;
 }
 
-export function getWsUrl(): string {
-  const configured = import.meta.env.VITE_WS_URL ?? API_URL;
-  return configured.replace(/^http/i, 'ws');
-}
-
-export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
+export async function apiRequest<T>(path: string, init?: RequestInit, options: { redirectOn401?: boolean } = {}): Promise<T> {
   const user = firebaseAuth.currentUser;
   const token = user ? await user.getIdToken() : null;
 
@@ -24,7 +19,7 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
     }
   });
 
-  if (response.status === 401) {
+  if (response.status === 401 && options.redirectOn401 !== false) {
     window.history.pushState({}, '', '/login');
     window.dispatchEvent(new PopStateEvent('popstate'));
     throw new Error('Sesión expirada');

@@ -5,30 +5,15 @@ services:
     build: ./backend
     restart: unless-stopped
     ports:
-      - "3001:3001"
-    volumes:
-      - ./data:/app/data
+      - "127.0.0.1:3001:3001"
     environment:
       NODE_ENV: production
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
-      AGENT_URL: ${AGENT_URL}
-      AGENT_KEY: ${AGENT_KEY}
-      DB_PATH: ${DB_PATH}
-      ADMIN_USERNAME: ${ADMIN_USERNAME}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      ALLOWED_EMAILS: ${ALLOWED_EMAILS}
 
   hub-frontend:
     build: ./frontend
     restart: unless-stopped
     ports:
-      - "3000:80"
-
-  hub-agent:
-    build: ./agent
-    restart: unless-stopped
-    ports:
-      - "9100:9100"
-    environment:
-      PORT: 9100
-      AGENT_KEY: ${AGENT_KEY}
+      - "127.0.0.1:3000:80"

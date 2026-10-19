@@ -1,15 +1,12 @@
 import express from 'express';
-import http from 'node:http';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { env } from './config/env';
 import { globalRateLimit, loginRateLimit } from './middleware/rate-limit.middleware';
 import { authRouter } from './routes/auth.routes';
-import { metricsRouter } from './routes/metrics.routes';
 import { projectsRouter } from './routes/projects.routes';
 import { errorMiddleware } from './middleware/error.middleware';
-import { attachMetricsWebSocket } from './ws/metrics.ws';
 
 const app = express();
 
@@ -23,7 +20,7 @@ app.use(
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", 'data:'],
-        connectSrc: ["'self'", 'wss:'],
+        connectSrc: ["'self'"],
         frameSrc: ["'none'"],
         objectSrc: ["'none'"]
       }
@@ -31,7 +28,7 @@ app.use(
     hsts: {
       maxAge: 31536000,
       includeSubDomains: true,
-      preload: true
+      preload: false
     },
     frameguard: { action: 'deny' },
     noSniff: true,
@@ -68,14 +65,10 @@ app.get('/healthz', (_request, response) => {
 
 app.use('/auth/login', loginRateLimit);
 app.use('/auth', authRouter);
-app.use('/metrics', metricsRouter);
 app.use('/projects', projectsRouter);
 
 app.use(errorMiddleware);
 
-const server = http.createServer(app);
-attachMetricsWebSocket(server);
-
-server.listen(env.port, () => {
+app.listen(env.port, () => {
   console.log(`hub-backend listening on ${env.port}`);
 });
