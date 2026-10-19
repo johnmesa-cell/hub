@@ -8,6 +8,7 @@ export function ProjectCard({ project }: { project: Project }) {
         <h3>{project.name}</h3>
         <p>{project.description ?? 'Sin descripción'}</p>
       </div>
+      {project.visibility === 'private' && <span className="project-visibility">Privado</span>}
       <span className="project-link">Abrir</span>
     </a>
   );
