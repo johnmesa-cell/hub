@@ -1,8 +1,17 @@
+# Dependencias
 node_modules
 dist
-data
+
+# Entorno y credenciales
 .env
 .env.*
 !.env.example
+backend/serviceAccountKey.json
+
+# Sistema
 .DS_Store
 coverage
+
+# Bases de datos y logs
+data
+*.log

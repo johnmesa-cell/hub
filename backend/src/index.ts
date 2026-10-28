@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import './config/firebase-admin';
 import { env } from './config/env';
 import { globalRateLimit, loginRateLimit } from './middleware/rate-limit.middleware';
 import { authRouter } from './routes/auth.routes';
@@ -9,11 +10,13 @@ import { projectsRouter } from './routes/projects.routes';
 import { errorMiddleware } from './middleware/error.middleware';
 
 const app = express();
+app.set('trust proxy', 1); // ← NUEVO
 
 const allowedOrigins = env.allowedOrigins.split(',').map((origin) => origin.trim()).filter(Boolean);
 
 app.use(
   helmet({
+    crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
@@ -38,16 +41,8 @@ app.use(
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin) {
-        callback(null, true);
-        return;
-      }
-
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-        return;
-      }
-
+      if (!origin) { callback(null, true); return; }
+      if (allowedOrigins.includes(origin)) { callback(null, true); return; }
       callback(new Error(`CORS: origen no permitido -> ${origin}`));
     },
     credentials: true,

@@ -7,16 +7,23 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:3001:3001"
+    volumes:
+      - ./backend/serviceAccountKey.json:/run/secrets/serviceAccountKey.json:ro
     environment:
       NODE_ENV: production
       FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/serviceAccountKey.json
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
       ALLOWED_EMAILS: ${ALLOWED_EMAILS}
     networks:
       - hub-net
 
   hub-frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+        VITE_WS_URL: ${VITE_WS_URL}
     container_name: hub-frontend
     restart: unless-stopped
     ports:
