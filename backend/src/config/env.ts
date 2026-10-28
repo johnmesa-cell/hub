@@ -14,8 +14,7 @@ export const env = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
   port: Number(process.env.PORT ?? 3001),
   firebaseProjectId: requireEnv('FIREBASE_PROJECT_ID'),
-  googleApplicationCredentials: requireEnv('GOOGLE_APPLICATION_CREDENTIALS'), // ← NUEVO
-  agentUrl: process.env.AGENT_URL ?? '',
-  agentKey: process.env.AGENT_KEY ?? '',
+  googleApplicationCredentials: requireEnv('GOOGLE_APPLICATION_CREDENTIALS'),
   allowedOrigins: process.env.ALLOWED_ORIGINS ?? 'http://localhost:5173',
+  allowedEmails: process.env.ALLOWED_EMAILS ?? ''
 };

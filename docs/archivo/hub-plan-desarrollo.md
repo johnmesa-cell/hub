@@ -1,3 +1,5 @@
+> **Histórico:** este documento describe una implementación anterior y no representa la arquitectura actual del proyecto.
+
 # Plan de Desarrollo — Proyecto Hub
 
 ## Portal central de administración con autenticación, dashboard de métricas en tiempo real y enrutamiento a proyectos

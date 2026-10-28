@@ -1,6 +1,6 @@
-# API Reference - Hub Backend
+# API del Hub
 
-Base URL: `https://hub.tudominio.com/api`
+Base URL: `https://api.tudominio.com`
 
 ## Autenticación
 
@@ -19,30 +19,20 @@ Response 401: { "error": "Unauthorized" }
 ## Proyectos
 
 ### GET /projects
-Response 200: Project[]
+Sin token devuelve únicamente proyectos `active=true` y `visibility=public`. Con un token Firebase válido y correo permitido devuelve todos los activos. `?all=true` autenticado incluye también inactivos; sin sesión se ignora.
+
+Response 200: `{ "projects": Project[] }`
 
 ### POST /projects (requiere auth)
 Body: CreateProjectSchema
-Response 201: Project
+Response 201: `{ "project": Project }`
 
 ### PUT /projects/:id (requiere auth)
 Body: UpdateProjectSchema
-Response 200: Project
+Response 200: `{ "project": Project }`
 
 ### DELETE /projects/:id (requiere auth)
 Response 204
 
-## Métricas
-
-### GET /metrics
-Header: Authorization Bearer
-Response 200: { server1: MetricsPayload, server2: MetricsPayload }
-
-### WebSocket ws://hub.tudominio.com/metrics/live
-Protocolo de handshake:
-1. Cliente conecta
-2. Cliente envía: { "type": "auth", "token": "<firebase-id-token>" }
-3. Servidor verifica token con Firebase Admin SDK
-4. Servidor responde: { "type": "auth_ok", "uid": "<firebase-uid>" } o cierra con 4001
-5. Servidor hace push cada 2s: { "type": "metrics", "server1": {...}, "server2": {...} }
-6. Cliente renueva token cada 50 minutos con getIdToken(true)
+### GET /healthz
+Endpoint público de salud. Responde `{ "ok": true }`.

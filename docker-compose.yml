@@ -6,18 +6,15 @@ services:
     container_name: hub-backend
     restart: unless-stopped
     ports:
-      - "3001:3001"
+      - "127.0.0.1:3001:3001"
     volumes:
       - ./backend/serviceAccountKey.json:/run/secrets/serviceAccountKey.json:ro
     environment:
       NODE_ENV: production
       FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/serviceAccountKey.json
-      AGENT_URL: ${AGENT_URL}
-      AGENT_KEY: ${AGENT_KEY}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
-    depends_on:
-      - hub-agent
+      ALLOWED_EMAILS: ${ALLOWED_EMAILS}
     networks:
       - hub-net
 
@@ -30,19 +27,9 @@ services:
     container_name: hub-frontend
     restart: unless-stopped
     ports:
-      - "3000:80"
+      - "127.0.0.1:3000:80"
     depends_on:
       - hub-backend
-    networks:
-      - hub-net
-
-  hub-agent:
-    build: ./agent
-    container_name: hub-agent
-    restart: unless-stopped
-    environment:
-      PORT: 9100
-      AGENT_KEY: ${AGENT_KEY}
     networks:
       - hub-net
 

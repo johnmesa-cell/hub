@@ -1,3 +1,5 @@
+> **Histórico:** este documento describe una implementación anterior y no representa la arquitectura actual del proyecto.
+
 # Hub — Plan de Implementación Fase 2
 ## Seguridad (Opción A) + Gaps Pendientes
 

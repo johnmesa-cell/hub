@@ -1,3 +1,5 @@
+> **Histórico:** este documento describe una implementación anterior y no representa la arquitectura actual del proyecto.
+
 # Hub — Documento de Verificación y Migración a Firebase Auth
 ## Checklist completo + Eliminación de BD local de usuarios + Google OAuth
 

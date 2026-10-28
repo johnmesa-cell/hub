@@ -2,7 +2,7 @@ import type { NextFunction, Request, Response } from 'express';
 import { writeAuditLog } from '../firestore/audit.firestore';
 
 export function auditAction(action: string) {
-  return (request: Request, _response: Response, next: NextFunction): void => {
+  return async (request: Request, _response: Response, next: NextFunction): Promise<void> => {
     const firebaseUid = request.firebaseUser?.uid ?? null;
     const forwardedFor = request.headers['x-forwarded-for'];
     const ip =
@@ -10,7 +10,6 @@ export function auditAction(action: string) {
         ? forwardedFor.split(',')[0].trim()
         : request.socket.remoteAddress ?? 'unknown';
 
-    // Fire-and-forget: no bloquea la respuesta
     writeAuditLog(firebaseUid, action, ip).catch((err) =>
       console.error('[audit] Error escribiendo log:', err)
     );

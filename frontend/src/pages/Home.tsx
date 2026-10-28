@@ -3,15 +3,18 @@ import { apiRequest } from '../api/client';
 import { NavBar } from '../components/NavBar';
 import { ProjectCard } from '../components/ProjectCard';
 import type { Project } from '../types';
+import { useAuth } from '../hooks/useAuth';
 
 export function Home() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const { user, loading } = useAuth();
 
   useEffect(() => {
-    void apiRequest<{ projects: Project[] }>('/projects')
+    if (loading) return;
+    void apiRequest<{ projects: Project[] }>('/projects', undefined, { redirectOn401: false })
       .then((response) => setProjects(response.projects))
       .catch(() => setProjects([]));
-  }, []);
+  }, [loading, user]);
 
   return (
     <div className="app-shell">

@@ -4,8 +4,7 @@
   "version": "0.1.0",
   "workspaces": [
     "backend",
-    "frontend",
-    "agent"
+    "frontend"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
